@@ -2,6 +2,11 @@ import streamlit as st
 import whisper
 import torch
 import os
+import os
+import ffmpeg
+
+# Assurer que FFmpeg est bien disponible
+os.environ["PATH"] += os.pathsep + "/usr/bin/"
 
 def transcribe_audio(file_path, model_size="base"):
     model = whisper.load_model(model_size)
