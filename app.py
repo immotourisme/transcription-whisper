@@ -1,21 +1,16 @@
 import streamlit as st
-import whisper
-import torch
 import os
-import os
-import ffmpeg
-
-# Assurer que FFmpeg est bien disponible
-os.environ["PATH"] += os.pathsep + "/usr/bin/"
+from faster_whisper import WhisperModel
 
 def transcribe_audio(file_path, model_size="tiny"):
-    model = whisper.load_model(model_size)
-    result = model.transcribe(file_path)
-    return result["text"]
+    model = WhisperModel(model_size, compute_type="int8")
+    segments, _ = model.transcribe(file_path)
+    transcript = " ".join(segment.text for segment in segments)
+    return transcript
 
 # Configuration Streamlit
-st.set_page_config(page_title="Transcription Audio avec Whisper", layout="centered")
-st.title("📝 Transcription Audio avec Whisper")
+st.set_page_config(page_title="Transcription Audio avec Faster Whisper", layout="centered")
+st.title("📝 Transcription Audio avec Faster Whisper")
 
 uploaded_file = st.file_uploader("Choisissez un fichier audio", type=["mp3", "wav", "m4a", "ogg", "flac"]) 
 
@@ -30,7 +25,7 @@ if uploaded_file is not None:
     
     st.write("🔄 Transcription en cours...")
     
-    # Transcription Whisper
+    # Transcription avec Faster Whisper
     transcript = transcribe_audio(file_path)
     
     st.success("✅ Transcription terminée !")
