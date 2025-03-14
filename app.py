@@ -1,8 +1,8 @@
 import streamlit as st
 import os
 import asyncio
-import wave
 from faster_whisper import WhisperModel
+from pydub import AudioSegment  # Import pour gérer tous les formats audio
 
 # Fix pour éviter les erreurs asyncio sur Streamlit Cloud
 try:
@@ -10,17 +10,17 @@ try:
 except RuntimeError:
     asyncio.set_event_loop(asyncio.new_event_loop())
 
+# Vérifier la durée du fichier audio avec pydub
+def check_audio_duration(file_path, max_duration=60):
+    audio = AudioSegment.from_file(file_path)
+    duration = len(audio) / 1000  # Durée en secondes
+    return duration <= max_duration
+
 def transcribe_audio(file_path, model_size="tiny"):
     model = WhisperModel(model_size, compute_type="int8")
     segments, _ = model.transcribe(file_path)
     transcript = " ".join(segment.text for segment in segments)
     return transcript
-
-# Vérifier la durée du fichier audio
-def check_audio_duration(file_path, max_duration=60):
-    with wave.open(file_path, "rb") as audio:
-        duration = audio.getnframes() / float(audio.getframerate())
-        return duration <= max_duration
 
 # Configuration Streamlit
 st.set_page_config(page_title="Transcription Audio avec Faster Whisper", layout="centered")
@@ -36,7 +36,7 @@ if uploaded_file is not None:
     os.makedirs("temp_audio", exist_ok=True)
     with open(file_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
-    
+
     # Vérifier la durée de l'audio
     if not check_audio_duration(file_path, max_duration=60):
         st.error("⏳ Le fichier audio est trop long ! Veuillez uploader un fichier de moins de 60 secondes.")
