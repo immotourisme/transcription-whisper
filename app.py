@@ -1,6 +1,13 @@
 import streamlit as st
 import os
+import asyncio
 from faster_whisper import WhisperModel
+
+# Fix pour éviter les erreurs asyncio sur Streamlit Cloud
+try:
+    asyncio.get_running_loop()
+except RuntimeError:
+    asyncio.set_event_loop(asyncio.new_event_loop())
 
 def transcribe_audio(file_path, model_size="tiny"):
     model = WhisperModel(model_size, compute_type="int8")
