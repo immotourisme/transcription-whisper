@@ -2,3 +2,4 @@ streamlit
 torch==2.2.0
 faster-whisper
 numpy<2
+wave
